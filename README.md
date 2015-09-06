@@ -1,31 +1,26 @@
-# fluxette-thunk
+# fluxette-promise
 
-Thunk middleware for [fluxette](https://github.com/edge/fluxette).
+Promise middleware for [fluxette](https://github.com/edge/fluxette).
 
 ## Install
 
 ```sh
-npm install --save fluxette-thunk
+npm install --save fluxette-promise
 ```
 
 ## Usage
 
-Thunks allow you to provide a function, instead of a plain action, to the flux dispatcher. The flux object is passed to the function, allowing you to dispatch asynchronously or conditionally, log actions and state, or accommodate other use cases.
+Allows you to chain dispatches by Promise, and turns thunked dispatches into Promises.
 
 ```js
 import Flux from 'fluxette';
-import thunk from 'fluxette-thunk';
+import promise from 'fluxette-promise';
 
-let flux = Flux(stores).using(thunk);
+let flux = Flux(stores).using(promise, thunk);
+let { dispatch } = flux;
 
-flux.dispatch(({ dispatch }) =>
-	asyncRequest(params, (err, res) => {
-		if (err) {
-			dispatch({ type: DATA_FAILURE, err });
-		}
-		else {
-			dispatch({ type: DATA_SUCCESS, data: res });
-		}
-	})
-)
+dispatch(getData(url))
+	.then(data => dispatch({ type: DATA_SUCCESS, data }))
+	.then(getMoreData(url))
+	.then(moreData => dispatch({ type: MOREDATA_SUCCESS, moreData }));
 ```
